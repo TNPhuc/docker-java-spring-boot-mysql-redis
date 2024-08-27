@@ -22,7 +22,7 @@ pipeline {
             }
             steps {
                 sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:latest"
-                withDockerRegistry(cridentialsId: 'docker-hub', url: 'https://index.docker.io/v1/'){
+                withDockerRegistry(credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/'){
                     sh "docker push $DOCKER_IMAGE:$DOCKER_TAG"
                     sh "docker push $DOCKER_IMAGE:latest"
                 }
