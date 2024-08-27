@@ -31,17 +31,16 @@ pipeline {
             }
         }
 
-        // stage ('Deploy QA server') {
-        //     when {
-        //         branch 'develop'
-        //     }
-        //     steps {
-        //         sh "docker compose down"
-        //         // sh "docker rmi $DOCKER_IMAGE:latest"
-        //         sh "docker pull $DOCKER_IMAGE:latest"
-        //         sh "docker compose up -d"
-        //         sh "docker image prune -f"
-        //     }
-        // }
+        stage ('Deploy QA server') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh "docker compose down"
+                sh "docker pull $DOCKER_IMAGE:latest"
+                sh "docker compose up -d"
+                sh "docker image prune -f"
+            }
+        }
     }
 }

@@ -1,5 +1,3 @@
-version: '3.7'
-
 services: 
   app:
     image: sixriz/app-java-spring-boot:latest
