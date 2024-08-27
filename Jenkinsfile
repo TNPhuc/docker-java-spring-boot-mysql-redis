@@ -8,9 +8,6 @@ pipeline {
     }
     stages {
         stage ('Build image docker') {
-            when {
-                branch 'develop'
-            }
             steps {
                 sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
             }
