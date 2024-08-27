@@ -12,9 +12,10 @@ pipeline {
                 branch 'develop'
             }
             steps {
-                sh "docker pull $DOCKER_IMAGE:latest || true "
-                sh "docker build --cache-from $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:$DOCKER_TAG ."
-                sh "docker rmi $DOCKER_IMAGE:latest"
+                //sh "docker pull $DOCKER_IMAGE:latest || true "
+                //sh "docker build --cache-from $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:$DOCKER_TAG ."
+                // sh "docker rmi $DOCKER_IMAGE:latest"
+                sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
             }
         }
 
