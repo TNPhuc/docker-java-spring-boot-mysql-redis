@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{layout}">
+<head>
+    <title>Add user</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <form novalidate action="#" th:action="@{/adduser}" th:object="${user}" method="post"
+              xmlns:th="http://www.w3.org/1999/xhtml" th:class="${#fields.hasErrors('name') || #fields.hasErrors('email')} ? was-validated : ''">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input required type="text" th:field="*{name}" id="name" placeholder="Name" class="form-control">
+                <div th:class="${#fields.hasErrors('name')} ? invalid-feedback : ''" class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input required type="text" th:field="*{email}" id="email" placeholder="Email" class="form-control">
+                <div th:class="${#fields.hasErrors('email')} ? invalid-feedback : ''" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add user</button>
+        </form>
+    </div>
+</body>
+</html>
+
+
+
