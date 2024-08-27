@@ -15,5 +15,20 @@ pipeline {
                 sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
             }
         }
+
+        stage ('Push image to Docker Hub') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:latest"
+                withDockerRegistry(cridentialsId: 'docker-hub', url: 'https://index.docker.io/v1/'){
+                    sh "docker push $DOCKER_IMAGE:$DOCKER_TAG"
+                    sh "docker push $DOCKER_IMAGE:latest"
+                }
+                sh "docker rmi $DOCKER_IMAGE:$DOCKER_TAG"
+                sh "docker rmi $DOCKER_IMAGE:latest"
+            }
+        }
     }
 }
