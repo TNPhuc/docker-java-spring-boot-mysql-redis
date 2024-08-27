@@ -7,16 +7,18 @@ pipeline {
         DOCKER_IMAGE="sixriz/app-java-spring-boot"
     }
     stages {
-        stage ('Build image docker') {
+        stage ('Build image') {
             when {
                 branch 'develop'
             }
             steps {
-                sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
+                sh "docker pull $DOCKER_IMAGE:latest || true "
+                sh "docker build --cache-from $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:$DOCKER_TAG ."
+                sh "docker rmi $DOCKER_IMAGE:latest"
             }
         }
 
-        stage ('Push image to Docker Hub') {
+        stage ('Release image') {
             when {
                 branch 'develop'
             }
@@ -28,6 +30,18 @@ pipeline {
                 }
                 sh "docker rmi $DOCKER_IMAGE:$DOCKER_TAG"
                 sh "docker rmi $DOCKER_IMAGE:latest"
+            }
+        }
+
+        stage ('Deploy QA server') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh "docker compose down"
+                sh "docker rmi $DOCKER_IMAGE:latest"
+                sh "docker pull $DOCKER_IMAGE:latest"
+                sh "docker compose up -d"
             }
         }
     }
