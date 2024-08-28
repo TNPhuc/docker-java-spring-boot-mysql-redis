@@ -1,62 +1,71 @@
 pipeline {
     agent none
     stages {
-        stage ('Build image') {
+        stage('Build image') {
             agent {
                 label 'node-1'
             }
-            environment {
-                DOCKER_TAG="${GIT_BRANCH.tokenize('/').pop()}-${GIT_COMMIT.substring(0,7)}"
-                DOCKER_IMAGE="sixriz/app-java-spring-boot"
-            }        
             when {
                 branch 'develop'
             }
             steps {
-                sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
-            }
-        }
-
-        stage ('Release image') {
-            agent {
-                label 'node-1'
-            }
-            environment {
-                DOCKER_TAG="${GIT_BRANCH.tokenize('/').pop()}-${GIT_COMMIT.substring(0,7)}"
-                DOCKER_IMAGE="sixriz/app-java-spring-boot"
-            }  
-            when {
-                branch 'develop'
-            }
-            steps {
-                sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:latest"
-                withDockerRegistry(credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/'){
-                    sh "docker push $DOCKER_IMAGE:$DOCKER_TAG"
-                    sh "docker push $DOCKER_IMAGE:latest"
+                script {
+                    def dockerTag = "${env.GIT_BRANCH.tokenize('/').pop()}-${env.GIT_COMMIT.substring(0,7)}"
+                    def dockerImage = "sixriz/app-java-spring-boot"
+                    echo "Building Docker image with tag: ${dockerTag}"
+                    sh "docker build -t $dockerImage:$dockerTag ."
                 }
-                sh "docker rmi $DOCKER_IMAGE:$DOCKER_TAG"
-                sh "docker rmi $DOCKER_IMAGE:latest"
             }
         }
 
-        stage ('Deploy QA server') {
+        stage('Release image') {
+            agent {
+                label 'node-1'
+            }
+            when {
+                branch 'develop'
+            }
+            steps {
+                script {
+                    def dockerTag = "${env.GIT_BRANCH.tokenize('/').pop()}-${env.GIT_COMMIT.substring(0,7)}"
+                    def dockerImage = "sixriz/app-java-spring-boot"
+                    echo "Releasing Docker image with tag: ${dockerTag}"
+                    sh "docker tag $dockerImage:$dockerTag $dockerImage:latest"
+                    withDockerRegistry(credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/') {
+                        sh "docker push $dockerImage:$dockerTag"
+                        sh "docker push $dockerImage:latest"
+                    }
+                    sh "docker rmi $dockerImage:$dockerTag"
+                    sh "docker rmi $dockerImage:latest"
+                }
+            }
+        }
+
+        stage('Deploy QA server') {
+            agent {
+                label 'node-1'
+            }
             when {
                 branch 'main'
             }
             steps {
-                sh "docker compose down"
-                sh "docker pull $DOCKER_IMAGE:latest"
-                sh "docker compose up -d"
-                sh "docker image prune -f"
+                script {
+                    def dockerImage = "sixriz/app-java-spring-boot"
+                    echo "Deploying Docker image: ${dockerImage}"
+                    sh "docker compose down"
+                    sh "docker pull $dockerImage:latest"
+                    sh "docker compose up -d"
+                    sh "docker image prune -f"
+                }
             }
         }
     }
     post {
         success {
-          echo "SUCCESSFUL"
+            echo "SUCCESSFUL"
         }
         failure {
-          echo "FAILED"
+            echo "FAILED"
         }
-    }    
+    }
 }
