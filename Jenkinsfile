@@ -8,14 +8,18 @@ pipeline {
     }
     stages {
         stage ('Build image') {
-
+            when {
+                branch 'develop'
+            }
             steps {
                 sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
             }
         }
 
         stage ('Release image') {
-
+            when {
+                branch 'develop'
+            }
             steps {
                 sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:latest"
                 withDockerRegistry(credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/'){
@@ -28,7 +32,9 @@ pipeline {
         }
 
         stage ('Deploy QA server') {
-
+            when {
+                branch 'main'
+            }
             steps {
                 sh "docker compose down"
                 sh "docker pull $DOCKER_IMAGE:latest"
