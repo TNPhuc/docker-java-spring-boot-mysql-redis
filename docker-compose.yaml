@@ -25,6 +25,7 @@ services:
       MYSQL_DATABASE: demo_app
     networks:
       - app-net
+    user: "1002:1002"
 
   redis:
     image: redis:6-alpine
@@ -34,6 +35,7 @@ services:
       - ./.docker/data/redis:/data
     networks:
       - app-net
+    user: "1002:1002"
 
 networks:
   app-net:
