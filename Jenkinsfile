@@ -18,7 +18,7 @@ pipeline {
 
         stage ('Release image') {
             when {
-                branch 'develop'
+                branch 'main'
             }
             steps {
                 sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:latest"
