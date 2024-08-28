@@ -1,13 +1,14 @@
 pipeline {
-    agent {
-        label 'node-1'
-    }
-    environment {
-        DOCKER_TAG="${GIT_BRANCH.tokenize('/').pop()}-${GIT_COMMIT.substring(0,7)}"
-        DOCKER_IMAGE="sixriz/app-java-spring-boot"
-    }
+    agent none
     stages {
         stage ('Build image') {
+            agent {
+                label 'node-1'
+            }
+            environment {
+                DOCKER_TAG="${GIT_BRANCH.tokenize('/').pop()}-${GIT_COMMIT.substring(0,7)}"
+                DOCKER_IMAGE="sixriz/app-java-spring-boot"
+            }        
             when {
                 branch 'develop'
             }
@@ -17,6 +18,13 @@ pipeline {
         }
 
         stage ('Release image') {
+            agent {
+                label 'node-1'
+            }
+            environment {
+                DOCKER_TAG="${GIT_BRANCH.tokenize('/').pop()}-${GIT_COMMIT.substring(0,7)}"
+                DOCKER_IMAGE="sixriz/app-java-spring-boot"
+            }  
             when {
                 branch 'develop'
             }
