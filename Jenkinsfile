@@ -5,6 +5,7 @@ pipeline {
     environment {
         def dockerTag = "${env.GIT_BRANCH.tokenize('/').pop()}-${env.GIT_COMMIT.substring(0,7)}"
         def dockerImage = "sixriz/app-java-spring-boot"
+        def dockerImageOfficial = "sixriz/app-java-spring-boot-release"
     }
     stages {
         stage('Build image') {
@@ -19,6 +20,24 @@ pipeline {
             }
         }
 
+        stage('Release image branch develop QA') {
+            steps {
+                when {
+                    branch 'develop'
+                }
+                script {
+                    echo "Releasing Docker image with tag: ${dockerTag} to Docker hub"
+                    sh "docker tag $dockerImage:$dockerTag $dockerImage:latest"
+                    withDockerRegistry(credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/') {
+                        sh "docker push $dockerImage:$dockerTag"
+                        sh "docker push $dockerImage:latest"
+                    }
+                    sh "docker rmi $dockerImage:$dockerTag"
+                    sh "docker rmi $dockerImage:latest"
+                }
+            }
+        }
+
         stage('Deploy to QA server') {
             steps {
                 when {
@@ -27,28 +46,28 @@ pipeline {
                 script {
                     echo "Deploying Docker image: ${dockerImage} to QA server"
                     sh "docker compose down"
-                    //sh "docker pull $dockerImage:latest"
+                    sh "docker pull $dockerImage:latest"
                     sh "docker compose up -d"
                     sh "docker image prune -f"
                 }
             }
         }
 
-        stage('Release image') {
+        stage('Release image official') {
             steps {
-            when {
-                branch 'main'
-            }
+                when {
+                    branch 'main'
+                }
                 script {
                     echo "Releasing Docker image with tag: ${dockerTag} to Docker hub"
-                    sh "docker build -t $dockerImage:$dockerTag ."
-                    sh "docker tag $dockerImage:$dockerTag $dockerImage:latest"
+                    sh "docker build -t $dockerImageOfficial:$dockerTag ."
+                    sh "docker tag $dockerImageOfficial:$dockerTag $dockerImageOfficial:latest"
                     withDockerRegistry(credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/') {
-                        sh "docker push $dockerImage:$dockerTag"
-                        sh "docker push $dockerImage:latest"
+                        sh "docker push $dockerImageOfficial:$dockerTag"
+                        sh "docker push $dockerImageOfficial:latest"
                     }
-                    sh "docker rmi $dockerImage:$dockerTag"
-                    sh "docker rmi $dockerImage:latest"
+                    sh "docker rmi $dockerImageOfficial:$dockerTag"
+                    sh "docker rmi $dockerImageOfficial:latest"
                 }
             }
         }
