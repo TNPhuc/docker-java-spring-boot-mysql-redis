@@ -3,9 +3,9 @@ pipeline {
         label 'node-1'
     }
     environment {
-        def dockerTag = "${env.GIT_BRANCH.tokenize('/').pop()}-${env.GIT_COMMIT.substring(0,7)}"
-        def dockerImage = "sixriz/app-java-spring-boot"
-        def dockerImageOfficial = "sixriz/app-java-spring-boot-release"
+        dockerTag = "${env.GIT_BRANCH.tokenize('/').pop()}-${env.GIT_COMMIT.substring(0,7)}"
+        dockerImage = "sixriz/app-java-spring-boot"
+        dockerImageOfficial = "sixriz/app-java-spring-boot-release"
     }
     stages {
         stage('Build image') {
@@ -21,10 +21,10 @@ pipeline {
         }
 
         stage('Release image branch develop QA') {
+            when {
+                branch 'develop'
+            }
             steps {
-                when {
-                    branch 'develop'
-                }
                 script {
                     echo "Releasing Docker image with tag: ${dockerTag} to Docker hub"
                     sh "docker tag $dockerImage:$dockerTag $dockerImage:latest"
@@ -39,10 +39,10 @@ pipeline {
         }
 
         stage('Deploy to QA server') {
+            when {
+                branch 'develop'
+            }
             steps {
-                when {
-                    branch 'develop'
-                }
                 script {
                     echo "Deploying Docker image: ${dockerImage} to QA server"
                     sh "docker compose down"
@@ -54,10 +54,10 @@ pipeline {
         }
 
         stage('Release image official') {
+            when {
+                branch 'main'
+            }
             steps {
-                when {
-                    branch 'main'
-                }
                 script {
                     echo "Releasing Docker image with tag: ${dockerTag} to Docker hub"
                     sh "docker build -t $dockerImageOfficial:$dockerTag ."
