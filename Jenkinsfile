@@ -71,19 +71,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                withCredentials([file(credentialsId: 'private-key-deploy-.26', variable: 'ANSIBLE_PRIVATE_KEY')]) {
-                    script {
-                        // Copy SSH key vào /tmp
-                        sh 'cp $ANSIBLE_PRIVATE_KEY /tmp/ansible_key'
-                        sh 'chmod 400 /tmp/ansible_key'
-
-                        // Chạy playbook để deploy lên Server B
-                        sh 'ansible-playbook -i /ansible/inventory.ini --private-key=/tmp/ansible_key /ansible/playbook.yml'
-
-                        // Xóa SSH key sau khi sử dụng
-                        sh 'rm -f /tmp/ansible_key'
-                    }
-                }
+                sh "docker --version"
             }
         }
     }
