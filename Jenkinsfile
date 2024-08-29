@@ -1,13 +1,9 @@
 pipeline {
-    agent none
+    agent {
+        label 'node-1'
+    }
     stages {
         stage('Build image') {
-            agent {
-                label 'node-1'
-            }
-            when {
-                branch 'develop'
-            }
             steps {
                 script {
                     def dockerTag = "${env.GIT_BRANCH.tokenize('/').pop()}-${env.GIT_COMMIT.substring(0,7)}"
@@ -19,12 +15,6 @@ pipeline {
         }
 
         stage('Release image') {
-            agent {
-                label 'node-1'
-            }
-            when {
-                branch 'develop'
-            }
             steps {
                 script {
                     def dockerTag = "${env.GIT_BRANCH.tokenize('/').pop()}-${env.GIT_COMMIT.substring(0,7)}"
@@ -42,12 +32,6 @@ pipeline {
         }
 
         stage('Deploy to QA server') {
-            agent {
-                label 'node-1'
-            }
-            when {
-                branch 'develop'
-            }
             steps {
                 script {
                     def dockerImage = "sixriz/app-java-spring-boot"
@@ -59,21 +43,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy to Production') {
-            agent {
-                docker {
-                    image 'khaliddinh/ansible'
-                    args '-v /tmp:/tmp' // Mount thư mục /tmp để lưu SSH key tạm thời
-                }
-            }
-            when {
-                branch 'main'
-            }
-            steps {
-                sh "docker --version"
-            }
-        }
     }
     post {
         success {
@@ -81,6 +50,9 @@ pipeline {
         }
         failure {
             echo "FAILED"
+        }
+        always {
+            cleanWs()
         }
     }
 }
