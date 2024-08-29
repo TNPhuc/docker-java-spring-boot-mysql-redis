@@ -60,8 +60,5 @@ pipeline {
         failure {
             echo "FAILED"
         }
-        always {
-            cleanWs()
-        }
     }
 }
